@@ -5,7 +5,10 @@ from django.utils.translation import gettext_lazy as _
 from apps.bookings.models import Booking, BookingStatus
 
 
-def create_booking(*, guest, listing, check_in, check_out, **kwargs):
+def create_booking(*, guest, listing, check_in, check_out, guests_count, **kwargs):
+    nights = (check_in - check_out).days
+    total_price = nights * listing.price
+
     with transaction.atomic():
         conflicting = Booking.objects.select_for_update().filter(
             listing=listing,
@@ -23,7 +26,9 @@ def create_booking(*, guest, listing, check_in, check_out, **kwargs):
             listing=listing,
             check_in=check_in,
             check_out=check_out,
-            **kwargs
+            total_price=total_price,
+            guests_count=guests_count
+
         )
         booking.save()
 

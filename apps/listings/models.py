@@ -20,6 +20,7 @@ class Listing(UniqueID,TimeStampedModel):
     max_guests = models.PositiveIntegerField(default=1, verbose_name=_("Max Guests"))
     owner = models.ForeignKey('users.Customer',on_delete=models.CASCADE,related_name='listings',
                               verbose_name=_('Owner'))
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Price per night"), validators=[MinValueValidator(('0.00'))])
 
     objects = ActiveListingManager()
     all_objects = models.Manager()

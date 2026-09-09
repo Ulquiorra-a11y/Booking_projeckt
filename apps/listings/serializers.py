@@ -9,7 +9,7 @@ class ListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = ('id','title','description','country','city','street','house_number','rooms','max_guests','owner_name',
-                  'created_at')
+                  'created_at', 'price')
         read_only_fields = ('id','created_at')
 
     def get_owner_name(self,obj):
