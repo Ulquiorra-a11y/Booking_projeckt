@@ -1,21 +1,22 @@
-from attr.validators import min_len
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models, transaction
 from django.db.models import Q,F
-from rest_framework.exceptions import ValidationError
+
 
 from core.models import UniqueID, TimeStampedModel, Guests, BookingStatus
 from django.utils.translation import gettext_lazy as _
 
 
 class Booking(UniqueID,TimeStampedModel):
-    guest = models.ForeignKey('users.Customer',on_delete=models.CASCADE,related_name='bookings',
+    guest = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='bookings',
                               verbose_name=_('Guest'))
-    listing = models.ForeignKey('listings.Listing',on_delete=models.CASCADE,related_name='bookings',
+    listing = models.ForeignKey('listings.Listing',on_delete=models.PROTECT,related_name='bookings',
                                 verbose_name=_('Listing'))
     check_in = models.DateField(verbose_name=_('Check In'))
     check_out = models.DateField(verbose_name=_('Check Out'))
-    guests_count = models.PositiveIntegerField(choices=Guests,default=BookingStatus.ONE,verbose_name=_('Guests Count'))
+    guests_count = models.PositiveIntegerField(choices=Guests,default=Guests.ONE,verbose_name=_('Guests Count'))
     status = models.CharField(choices=BookingStatus,default=BookingStatus.PENDING,max_length=10,verbose_name=_('Status'))
     total_price = models.DecimalField(max_digits=10,decimal_places=2,verbose_name=_('Total Price'))
 

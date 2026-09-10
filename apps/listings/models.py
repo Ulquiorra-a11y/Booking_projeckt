@@ -1,5 +1,6 @@
 from datetime import timezone
 
+from django.conf import settings
 from django.core.validators import MinLengthValidator, MinValueValidator
 from django.db import models
 
@@ -17,8 +18,8 @@ class Listing(UniqueID,TimeStampedModel):
     house_number = models.CharField(max_length=15, verbose_name=_("House Number"))
     available = models.BooleanField(default=True, verbose_name=_("Available"))
     rooms = models.PositiveIntegerField(default=1,validators=[MinValueValidator(1)], verbose_name=_("Rooms"))
-    max_guests = models.PositiveIntegerField(default=1, verbose_name=_("Max Guests"))
-    owner = models.ForeignKey('users.Customer',on_delete=models.CASCADE,related_name='listings',
+    max_guests = models.PositiveIntegerField(default=1,validators=[MinValueValidator(1)], verbose_name=_("Max Guests"))
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='listings',
                               verbose_name=_('Owner'))
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Price per night"), validators=[MinValueValidator(('0.00'))])
 

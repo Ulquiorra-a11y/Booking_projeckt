@@ -1,3 +1,5 @@
+from datetime import timezone
+
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -26,6 +28,11 @@ class Customer(UniqueID,TimeStampedModel,AbstractBaseUser, PermissionsMixin):
     @property
     def is_deleted(self):
         return self.deleted_at is not None
+
+    def delete(self, *args, **kwargs):
+        self.deleted_at = timezone.now()
+        self.is_active = False
+        self.save(update_fields=['deleted_at', 'is_active'])
 
     def __str__(self):
         return f"{self.first_name}, {self.last_name}"
