@@ -104,6 +104,25 @@ DATABASES = {
     'default': MYSQL_DB if env.bool('MY_SQL', default=False) else SQLITE_DB
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ]
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Spectacular REST Framework',
+    'VERSION': 1,
+    'DESCRIPTION': 'Spectacular REST Framework',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/6.1/ref/settings/#auth-password-validators

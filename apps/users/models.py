@@ -8,14 +8,14 @@ from apps.users.managers import CustomerManager
 from core.models import UniqueID, TimeStampedModel
 from django.utils.translation import gettext_lazy as _
 
-from core.validators import phone_validator
+from core.validators import phone_validator,validate_birth_date
 
 
 class Customer(UniqueID,TimeStampedModel,AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=50,verbose_name=_('First Name'))
     last_name = models.CharField(max_length=50,verbose_name=_('Last Name'))
     email = models.EmailField(unique=True , max_length=250, verbose_name=_("Email"))
-    birth_date = models.DateField(verbose_name=_('Birth Date'),blank=True, null=True)
+    birth_date = models.DateField(verbose_name=_('Birth Date'),blank=True, null=True,validators=[validate_birth_date])
     phone_number = models.CharField(max_length=20,validators=[phone_validator],verbose_name=_('Phone Number'))
     is_active = models.BooleanField(default=True, verbose_name=_('Active'))
     is_staff = models.BooleanField(default=False, verbose_name=_('Staff status'))

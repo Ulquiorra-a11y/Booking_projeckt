@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinLengthValidator
 from django.db import models, transaction
 from django.db.models import Q,F
+from core.validators import validate_not_in_past, validate_date
 
 
 from core.models import UniqueID, TimeStampedModel, Guests, BookingStatus
@@ -14,7 +15,7 @@ class Booking(UniqueID,TimeStampedModel):
                               verbose_name=_('Guest'))
     listing = models.ForeignKey('listings.Listing',on_delete=models.PROTECT,related_name='bookings',
                                 verbose_name=_('Listing'))
-    check_in = models.DateField(verbose_name=_('Check In'))
+    check_in = models.DateField(verbose_name=_('Check In'),validators=[validate_not_in_past])
     check_out = models.DateField(verbose_name=_('Check Out'))
     guests_count = models.PositiveIntegerField(choices=Guests,default=Guests.ONE,verbose_name=_('Guests Count'))
     status = models.CharField(choices=BookingStatus,default=BookingStatus.PENDING,max_length=10,verbose_name=_('Status'))
@@ -23,8 +24,8 @@ class Booking(UniqueID,TimeStampedModel):
     def clean(self):
         super().clean()
 
-        if self.check_in and self.check_out and self.check_out <= self.check_in:
-            raise ValidationError(_('Check-out date must be after check-in date.'))
+        if self.check_in and self.check_out:
+            validate_date(self.check_in, self.check_out)
 
         overlapping = Booking.objects.filter(listing=self.listing,status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
             check_in__lt=self.check_out,check_out__gt=self.check_in,).exclude(pk=self.pk)

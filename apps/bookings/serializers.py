@@ -1,6 +1,11 @@
+from datetime import timezone
+
+from django.core.exceptions import ValidationError as ValidationErrorCore
 from rest_framework import serializers
 
 from apps.bookings.models import Booking
+from core.validators import validate_not_in_past, validate_date
+
 
 class BookingSerializer(serializers.ModelSerializer):
     listing_title = serializers.CharField(source='listing.title', read_only=True)
@@ -13,6 +18,23 @@ class BookingSerializer(serializers.ModelSerializer):
 
     def get_guest_name(self, obj):
         return f"{obj.guest.first_name} {obj.guest.last_name}"
+
+    def validate_check_in(self, value):
+        try:
+            validate_not_in_past(value)
+        except ValidationErrorCore as e:
+            raise serializers.ValidationError(e)
+        return value
+
+    def validate(self, data):
+        check_in = data.get('check_in')
+        check_out = data.get('check_out')
+        if check_in and check_out:
+            try:
+                validate_date(check_in, check_out)
+            except ValidationErrorCore as e:
+                raise serializers.ValidationError(e)
+        return data
 
 class BookingShortSerializer(serializers.ModelSerializer):
     listing_title = serializers.CharField(source='listing.title', read_only=True)
