@@ -19,13 +19,6 @@ class BookingSerializer(serializers.ModelSerializer):
     def get_guest_name(self, obj):
         return f"{obj.guest.first_name} {obj.guest.last_name}"
 
-    def validate_check_in(self, value):
-        try:
-            validate_not_in_past(value)
-        except ValidationErrorCore as e:
-            raise serializers.ValidationError(e)
-        return value
-
     def validate(self, data):
         check_in = data.get('check_in')
         check_out = data.get('check_out')

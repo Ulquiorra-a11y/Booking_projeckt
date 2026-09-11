@@ -29,15 +29,6 @@ class CustomerRegisterSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ('email', 'password', 'first_name', 'last_name', 'birth_date', 'phone_number')
 
-    def validate_birth_date(self, value):
-        if value is None:
-            return value
-        try:
-            validate_birth_date(value)
-        except ValidationErrorCore as e:
-            raise serializers.ValidationError(e)
-        return value
-
     def create(self, validated_data):
         password = validated_data.pop('password')
         return Customer.objects.create_user(password=password, **validated_data)
