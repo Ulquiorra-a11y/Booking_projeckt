@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError as ValidationErrorCore
 from rest_framework import serializers
 
 from apps.bookings.models import Booking
-from core.validators import validate_not_in_past, validate_date
+from core.validators import validate_date
 
 
 class BookingSerializer(serializers.ModelSerializer):

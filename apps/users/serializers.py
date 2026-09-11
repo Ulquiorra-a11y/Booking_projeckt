@@ -1,8 +1,6 @@
-from django.core.exceptions import ValidationError as ValidationErrorCore
 from rest_framework import serializers
 
 from apps.users.models import Customer
-from core.validators import validate_birth_date
 
 
 class CustomerSerializer(serializers.ModelSerializer):

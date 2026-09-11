@@ -1,4 +1,6 @@
-from datetime import timezone
+from decimal import Decimal
+
+from django.utils import timezone
 
 from django.conf import settings
 from django.core.validators import MinLengthValidator, MinValueValidator
@@ -16,12 +18,12 @@ class Listing(UniqueID,TimeStampedModel):
     city = models.CharField(max_length=100, verbose_name=_("City"))
     street = models.CharField(max_length=100, verbose_name=_("Street"))
     house_number = models.CharField(max_length=15, verbose_name=_("House Number"))
-    available = models.BooleanField(default=True, verbose_name=_("Available"))
+    is_active = models.BooleanField(default=True, verbose_name=_("Available"))
     rooms = models.PositiveIntegerField(default=1,validators=[MinValueValidator(1)], verbose_name=_("Rooms"))
     max_guests = models.PositiveIntegerField(default=1,validators=[MinValueValidator(1)], verbose_name=_("Max Guests"))
     owner = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='listings',
                               verbose_name=_('Owner'))
-    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Price per night"), validators=[MinValueValidator(('0.00'))])
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Price per night"), validators=[MinValueValidator(Decimal('0.01'))])
 
     objects = ActiveListingManager()
     all_objects = models.Manager()
@@ -52,4 +54,6 @@ class Listing(UniqueID,TimeStampedModel):
         )
         return not overlapping.exists()
 
-
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

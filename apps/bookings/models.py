@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.core.validators import MinLengthValidator
 from django.db import models, transaction
 from django.db.models import Q,F
 from core.validators import validate_not_in_past, validate_date

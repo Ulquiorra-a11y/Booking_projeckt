@@ -15,7 +15,7 @@ class ListingSerializer(serializers.ModelSerializer):
     def get_owner_name(self,obj):
         return f'{obj.owner.last_name} {obj.owner.first_name}'
 
-class ListingDetailSerializer(serializers.ModelSerializer):
+class ListingShortUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = ('id','title','description','price')
