@@ -6,7 +6,14 @@ from apps.bookings.models import Booking, BookingStatus
 
 
 def create_booking(*, guest, listing, check_in, check_out, guests_count):
-    nights = (check_in - check_out).days
+    if listing.owner_id == guest.id:
+        raise ValidationError(_('You cannot book your own listing.'))
+    if not listing.is_active:
+        raise ValidationError(_('This listing is not available for booking.'))
+
+    nights = (check_out - check_in).days
+    if nights <= 0:
+        raise ValidationError(_('Check-out date must be after check-in date.'))
     total_price = nights * listing.price
 
     with transaction.atomic():

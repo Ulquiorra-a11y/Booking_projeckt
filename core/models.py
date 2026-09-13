@@ -11,7 +11,7 @@ class UniqueID(models.Model):
 class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Created at'))
     updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Updated at'))
-    deleted_at = models.DateTimeField(null=True, verbose_name=_('Deleted at'))
+    deleted_at = models.DateTimeField(null=True,blank=True, verbose_name=_('Deleted at'))
 
     class Meta:
         abstract = True
@@ -210,13 +210,14 @@ class City(models.TextChoices):
     SHARM_EL_SHEIKH = "SSH", _("Sharm El Sheikh")
 
 class Guests(models.IntegerChoices):
-    ONE = 1, 1
-    TWO = 2, 2
-    THREE = 3, 3
-    FOUR = 4, 4
-    FIVE = 5, 5
-    SIX = 6, 6
-    SEVEN = 7, 7
+    ONE = 1, _('1 quest')
+    TWO = 2, _('2 quests')
+    THREE = 3, _('3 quests')
+    FOUR = 4, _('4 quests')
+    FIVE = 5, _('5 quests')
+    SIX = 6, _('6 quests')
+    SEVEN = 7, _('7 quests')
+
 
 class BookingStatus(models.TextChoices):
     PENDING = 'pending', _('Pending')

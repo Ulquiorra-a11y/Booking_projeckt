@@ -23,10 +23,7 @@ class BookingSerializer(serializers.ModelSerializer):
         check_in = data.get('check_in')
         check_out = data.get('check_out')
         if check_in and check_out:
-            try:
-                validate_date(check_in, check_out)
-            except ValidationErrorCore as e:
-                raise serializers.ValidationError(e)
+            validate_date(check_in, check_out)
         return data
 
 class BookingShortSerializer(serializers.ModelSerializer):

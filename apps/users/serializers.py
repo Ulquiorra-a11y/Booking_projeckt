@@ -3,22 +3,16 @@ from rest_framework import serializers
 from apps.users.models import Customer
 
 
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        fields = '__all__'
-        read_only_fields = ('id','deleted_at','created_at','updated_at')
-
 class CustomerNameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
         fields = ('first_name','last_name')
 
-class CustomerDetailSerializer(serializers.ModelSerializer):
+class CustomerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Customer
-        fields = ('email', 'first_name', 'last_name', 'birth_date', 'phone_number')
-
+        fields = ('id', 'email', 'first_name', 'last_name', 'birth_date', 'phone_number', 'created_at')
+        read_only_fields = ('id', 'email', 'created_at')
 
 class CustomerRegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)

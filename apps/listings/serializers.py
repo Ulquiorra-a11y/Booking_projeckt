@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.listings.models import Listing
+from apps.listings.models import Listing, Photos
 
 
 class ListingSerializer(serializers.ModelSerializer):
@@ -19,3 +19,17 @@ class ListingShortUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = ('id','title','description','price')
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Photos
+        fields = ('id', 'listing', 'image', 'is_main', 'order', 'created_at')
+        read_only_fields = ('id', 'created_at')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            self.fields['listing'].queryset = Listing.objects.filter(owner=request.user)

@@ -23,6 +23,9 @@ class Booking(UniqueID,TimeStampedModel):
     def clean(self):
         super().clean()
 
+        if self.listing and not self.listing.is_active:
+            raise ValidationError(_('This listing is not available for booking.'))
+
         if self.check_in and self.check_out:
             validate_date(self.check_in, self.check_out)
 
@@ -45,6 +48,11 @@ class Booking(UniqueID,TimeStampedModel):
         verbose_name = _('Booking')
         verbose_name_plural = _('Bookings')
         ordering = ('-check_in',)
-        constraints = [models.CheckConstraint(check=Q(check_out__gt=F('check_in')),name="check_out_after_checkin"),]
+        constraints = [models.CheckConstraint(condition=Q(check_out__gt=F('check_in')),name="check_out_after_checkin"),]
+        indexes = [
+            models.Index(fields=['listing', 'check_in', 'check_out'], name='booking_listing_dates_idx'),
+            models.Index(fields=['status'], name='booking_status_idx'),
+            models.Index(fields=['-check_in'], name='booking_check_in_idx'),
+        ]
 
 

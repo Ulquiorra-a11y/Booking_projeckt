@@ -43,4 +43,7 @@ class Customer(UniqueID,TimeStampedModel,AbstractBaseUser, PermissionsMixin):
         get_latest_by = 'created_at'
         verbose_name = _('Customer')
         verbose_name_plural = _('Customers')
-
+        indexes = [
+            models.Index(fields=['-created_at'], name='customer_date_joined_idx'),
+            models.Index(fields=['deleted_at'], name='customer_deleted_at_idx'),
+        ]

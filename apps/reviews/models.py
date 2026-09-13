@@ -27,5 +27,9 @@ class Review(TimeStampedModel, UniqueID):
         verbose_name = _('Review')
         verbose_name_plural = _('Reviews')
         ordering = ['-created_at']
-        constraints = [models.CheckConstraint(check=Q(grade__gte=1) & Q(grade__lte=5), name='grade_between_1_and_5')]
+        constraints = [models.CheckConstraint(condition=Q(grade__gte=1) & Q(grade__lte=5), name='grade_between_1_and_5')]
+        indexes = [
+            models.Index(fields=['-created_at'], name='review_created_at_idx'),
+            models.Index(fields=['grade'], name='review_grade_idx'),
+        ]
 
