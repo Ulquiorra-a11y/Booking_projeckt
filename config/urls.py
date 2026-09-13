@@ -25,7 +25,7 @@ from apps.listings.views import ListingViewSet, PhotoViewSet
 from apps.reviews.views import ReviewViewSet
 
 router = DefaultRouter()
-router.register('listings', ListingViewSet, basename='listing')
+router.register('listings/create', ListingViewSet, basename='listing')
 router.register('bookings', BookingViewSet, basename='booking')
 router.register('reviews', ReviewViewSet, basename='review')
 router.register('photos', PhotoViewSet, basename='photo')
@@ -33,7 +33,7 @@ router.register('photos', PhotoViewSet, basename='photo')
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('',include('apps.bookings.urls')),
-    # path('',include('apps.listings.urls')),
+    path('',include('apps.listings.urls')),
     # path('',include('apps.reviews.urls')),
     path('', include(router.urls)),
     path('',include('apps.users.urls')),

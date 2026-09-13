@@ -2,13 +2,21 @@ from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from apps.listings.models import Listing, Photos
 from apps.listings.serializers import ListingSerializer, ListingShortUpdateSerializer, PhotoSerializer
 from core.permissions import IsOwnerOrReadOnly
+
+
+class ListingListAPIView(ListAPIView):
+    queryset = Listing.objects.all()
+    serializer_class = ListingSerializer
+    permission_classes = [AllowAny]
 
 
 
@@ -19,7 +27,7 @@ class ListingViewSet(ModelViewSet):
         return Listing.objects.select_related('owner').prefetch_related('photos')
 
     def get_serializer_class(self):
-        if self.action in ('update', 'partial_update','list'):
+        if self.action in ('update', 'partial_update',):
             return ListingShortUpdateSerializer
         return ListingSerializer
 
@@ -70,23 +78,3 @@ class PhotoViewSet(ModelViewSet):
             queryset = queryset.filter(listing_id=listing_id)
 
         return queryset
-
-    def perform_create(self, serializer):
-        listing = serializer.validated_data['listing']
-
-        if listing.owner_id != self.request.user.id:
-            raise PermissionDenied('You can anly add photos for your own listing.')
-
-        serializer.save()
-
-    def perform_update(self, serializer):
-        if serializer.instance.listing.owner_id != self.request.user.id:
-            raise PermissionDenied('You can only edit photos of your ads.')
-
-        serializer.save()
-
-    def perform_destroy(self, instance):
-        if instance.listing.owner_id != self.request.user.id:
-            raise PermissionDenied('You can only delete photos of your ads.')
-
-        instance.delete()

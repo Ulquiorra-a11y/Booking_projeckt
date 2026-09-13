@@ -14,7 +14,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     booking = serializers.PrimaryKeyRelatedField(queryset=Booking.objects.all(),write_only=True)
     class Meta:
         model = Review
-        fields = ('id','user','booking','booking_info','booking_info','grade')
+        fields = ('id','user','booking','description','booking_info','booking_info','grade')
         read_only_fields = ('id',)
 
     def validate_booking(self, booking):
