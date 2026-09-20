@@ -10,6 +10,16 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Booking(UniqueID,TimeStampedModel):
+    """
+        Represents a guest's reservation for a specific listing.
+
+        A booking always belongs to exactly one listing and one guest. Model-level
+        validation (see `clean()`) enforces that the listing is active, the
+        check-out date is after check-in, and the requested date range does not
+        overlap with any other PENDING or CONFIRMED booking on the same listing.
+        `total_price` is set once at creation time and is not recalculated
+        automatically if the listing's price changes afterward.
+    """
     guest = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.PROTECT,related_name='bookings',
                               verbose_name=_('Guest'))
     listing = models.ForeignKey('listings.Listing',on_delete=models.PROTECT,related_name='bookings',
@@ -21,6 +31,9 @@ class Booking(UniqueID,TimeStampedModel):
     total_price = models.DecimalField(max_digits=10,decimal_places=2,verbose_name=_('Total Price'))
 
     def clean(self):
+        """
+        Validate the booking before it is saved.
+        """
         super().clean()
 
         if self.listing and not self.listing.is_active:
@@ -36,6 +49,9 @@ class Booking(UniqueID,TimeStampedModel):
             raise ValidationError(_('These dates are already booked for this listing.'))
 
     def save(self, *args, **kwargs):
+        """
+        Save the booking after running full model validation.
+        """
         self.full_clean()
         super().save(*args, **kwargs)
 

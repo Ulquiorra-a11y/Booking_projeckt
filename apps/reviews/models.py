@@ -6,6 +6,15 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Review(TimeStampedModel, UniqueID):
+    """
+    Represents a guest's review of a completed booking.
+
+    Tied one-to-one to a Booking rather than directly to a user/listing pair,
+    so a review can only exist for a booking that actually happened, and a
+    booking can have at most one review. `user` and `listing` are exposed as
+    read-only convenience properties derived from the related booking,
+    avoiding duplicated foreign keys that could drift out of sync.
+    """
     booking = models.OneToOneField('bookings.Booking',on_delete=models.CASCADE,related_name='review',
                                    verbose_name=_('Booking'))
     description = models.TextField(verbose_name=_('Description'),max_length=255)
@@ -13,10 +22,16 @@ class Review(TimeStampedModel, UniqueID):
 
     @property
     def user(self):
+        """
+        Return the guest who made the reviewed booking
+        """
         return self.booking.guest
 
     @property
     def listing(self):
+        """
+        Return the listing that was reviewed
+        """
         return self.booking.listing
 
     def __str__(self):

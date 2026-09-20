@@ -12,6 +12,15 @@ from core.validators import phone_validator,validate_birth_date
 
 
 class Customer(UniqueID,TimeStampedModel,AbstractBaseUser, PermissionsMixin):
+    """
+        Custom user model for the platform, authenticated by email instead of username.
+
+        A Customer can act as both a listing owner (host) and a booking guest —
+        there are no separate role fields; the role is implicit in whether the
+        user has related Listings (as owner) or Bookings (as guest). Deletion is
+        soft: `delete()` deactivates the account and marks it as deleted rather
+        than removing the row, so related PROTECT'd bookings/listings remain intact.
+    """
     first_name = models.CharField(max_length=50,verbose_name=_('First Name'))
     last_name = models.CharField(max_length=50,verbose_name=_('Last Name'))
     email = models.EmailField(unique=True , max_length=250, verbose_name=_("Email"))
@@ -30,6 +39,14 @@ class Customer(UniqueID,TimeStampedModel,AbstractBaseUser, PermissionsMixin):
         return self.deleted_at is not None
 
     def delete(self, *args, **kwargs):
+        """
+                Soft-delete the customer by marking them inactive and setting
+                `deleted_at`, instead of removing the row.
+
+                Keeps the account (and its ID) intact so related objects with
+                `on_delete=PROTECT` (e.g. Bookings, Listings) are not affected,
+                and preserves historical/financial records tied to this user.
+        """
         self.deleted_at = timezone.now()
         self.is_active = False
         self.save(update_fields=['deleted_at', 'is_active'])

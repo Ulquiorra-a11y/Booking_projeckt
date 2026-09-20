@@ -21,24 +21,24 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.routers import DefaultRouter
 
 from apps.bookings.views import BookingViewSet
-from apps.listings.views import ListingViewSet, PhotoViewSet
+from apps.listings.views import ListingViewSet, PhotoViewSet, ListingListViewSet
 from apps.reviews.views import ReviewViewSet
 
 router = DefaultRouter()
-router.register('listings/create', ListingViewSet, basename='listing')
+router.register('listings/create', ListingViewSet, basename='listing-create')
 router.register('bookings', BookingViewSet, basename='booking')
 router.register('reviews', ReviewViewSet, basename='review')
 router.register('photos', PhotoViewSet, basename='photo')
-
+router.register('listings', ListingListViewSet, basename='listing')
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('',include('apps.bookings.urls')),
-    path('',include('apps.listings.urls')),
+    # path('',include('apps.listings.urls')),
     # path('',include('apps.reviews.urls')),
     path('', include(router.urls)),
     path('',include('apps.users.urls')),
     path('api-auth/', include('rest_framework.urls')),
-    path('swagger/', SpectacularSwaggerView.as_view(permission_classes=[IsAuthenticated]), name='spectacular_swagger'),
+    path('swagger/', SpectacularSwaggerView.as_view(), name='spectacular_swagger'),
     path('docs/', SpectacularRedocView.as_view(), name='docs'),
 
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

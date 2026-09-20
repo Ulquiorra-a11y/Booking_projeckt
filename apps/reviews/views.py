@@ -1,4 +1,6 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, permissions
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 
 from apps.reviews.models import Review
@@ -10,11 +12,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = [IsReviewCreatorOrReadOnly,IsAuthenticatedOrReadOnly]
+    filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
 
     def get_queryset(self):
         queryset = Review.objects.select_related('booking__guest','booking__listing')
         listing_id = self.request.query_params.get('listing')
         if listing_id:
             queryset = queryset.filter(booking__listing_id=listing_id)
-            return queryset
+        return queryset
 

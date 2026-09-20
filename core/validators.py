@@ -15,17 +15,25 @@ phone_validator = RegexValidator(
 
 
 def validate_not_in_past(value):
+    """Field validator: reject a date that is earlier than today."""
     if value < timezone.now().date():
         raise ValidationError(_('Date cannot be in the past.'))
 
 
 def validate_date(start_date, end_date):
+    """Cross-field validator: ensure `end_date` is strictly after `start_date`."""
     if end_date <= start_date:
         raise ValidationError(_('End date must be after start date.'))
 
 
 
 def validate_birth_date(value):
+    """
+    Field validator for a date of birth.
+
+    Rejects dates in the future and dates implying an age greater than
+    `MAX_AGE_YEARS`.
+    """
     today = timezone.now().date()
 
     if value > today:
@@ -37,6 +45,10 @@ def validate_birth_date(value):
 
 
 def validate_not_too_far_in_future(value):
+    """
+    Field validator: reject a date more than `MAX_BOOKING_ADVANCE_DAYS`
+    days from today.
+    """
     max_allowed_date = timezone.now().date() + timedelta(days=MAX_BOOKING_ADVANCE_DAYS)
     if value > max_allowed_date:
         raise ValidationError(

@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'core',
     'apps.listings.apps.ListingsConfig',
     'apps.bookings.apps.BookingsConfig',
     'apps.users.apps.UsersConfig',
@@ -119,12 +120,22 @@ REST_FRAMEWORK = {
     ],
     'EXCEPTION_HANDLER': 'core.exceptions.custom_exception_handler',
 
+    'DEFAULT_PAGINATION_CLASS': (
+        'rest_framework.pagination.PageNumberPagination'
+    ),
+    'PAGE_SIZE': 10,
+
 }
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Spectacular REST Framework',
     'VERSION': 1,
     'DESCRIPTION': 'Spectacular REST Framework',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_PERMISSIONS': [
+        'rest_framework.permissions.IsAdminUser',
+    ]
+
 }
 
 # Password validation
@@ -144,6 +155,38 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'logs' / 'app.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'apps': {
+            'handlers': ['console', 'file'],
+            'level': 'DEBUG',
+        },
+    },
+}
 
 AUTH_USER_MODEL = 'users.Customer'
 
@@ -168,8 +211,10 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# MAILERS = {
+#     'default': {
+#         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+#     },
+# }
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@yourbooking.com'

@@ -13,10 +13,20 @@ from core.models import UniqueID, TimeStampedModel, BookingStatus
 from django.utils.translation import gettext_lazy as _
 
 
-MAX_PHOTOS = 5
+MAX_PHOTOS = 6
 
 
 class Listing(UniqueID,TimeStampedModel):
+    """
+    Represents a property listed for booking by its owner.
+
+    Availability is tracked in two independent ways: `is_active` reflects
+    whether the owner has published the listing at all, while date-specific
+    availability (whether it's free for a given check-in/check-out range) is
+    computed on demand via `is_available_for()` or `ActiveListingManager`,
+    not stored as a field. Deletion is soft (see `delete()`); `objects` only
+    returns non-deleted listings, while `all_objects` includes everything.
+    """
     title = models.CharField(max_length=100, verbose_name=_("Title"), validators=[MinLengthValidator(10)])
     description = models.TextField(max_length=999, verbose_name=_("Description"), validators=[MinLengthValidator(10)])
     country = models.CharField(max_length=100, verbose_name=_("Country"))
@@ -36,6 +46,9 @@ class Listing(UniqueID,TimeStampedModel):
 
     @property
     def main_photo(self):
+        """
+        Return the listing's main photo, or None if none is marked as main.
+        """
         return self.photos.filter(is_main=True).first()
 
     @property
@@ -44,6 +57,9 @@ class Listing(UniqueID,TimeStampedModel):
 
     @property
     def average_rating(self):
+        """
+        Return the average review grade across all bookings, or None if there are no reviews.
+        """
         return self.bookings.filter(review__isnull=False).aggregate(avg=Avg('review__grade'))['avg']
 
     def delete(self, *args, **kwargs):
@@ -67,6 +83,13 @@ class Listing(UniqueID,TimeStampedModel):
         ]
 
     def is_available_for(self, check_in, check_out):
+        """
+        Check whether this listing has no PENDING or CONFIRMED booking
+        overlapping the given date range.
+        :param check_in: Requested check-in date.
+        :param check_out: Requested check-out date.
+        :return: bool: True if the listing is free for the given dates.
+        """
         overlapping = self.bookings.filter(
             status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED],
             check_in__lt=check_out,
@@ -80,6 +103,14 @@ class Listing(UniqueID,TimeStampedModel):
 
 
 class Photos(TimeStampedModel,UniqueID):
+    """
+    Represents a single photo attached to a listing.
+
+    A listing may have at most `MAX_PHOTOS` photos (enforced in `clean()`
+    on creation only). At most one photo per listing can be marked as
+    `is_main`; setting a new one automatically unmarks the previous one
+    (see `save()`).
+    """
     image = models.ImageField(upload_to='photos/%Y/%m', verbose_name=_("Photo"),
                               validators=[FileExtensionValidator(['jpg', 'png','jpeg'])])
     listing = models.ForeignKey('Listing',on_delete=models.CASCADE,verbose_name=_("Listing"),related_name='photos')
@@ -100,6 +131,12 @@ class Photos(TimeStampedModel,UniqueID):
         ]
 
     def clean(self):
+        """
+        Enforce the per-listing photo limit on creation.
+
+        Only checked for new photos (not on updates to an existing photo),
+        since the count should not block edits to already-saved records.
+        """
         super().clean()
 
         is_new = not Photos.objects.filter(pk=self.pk).exists()
@@ -109,6 +146,13 @@ class Photos(TimeStampedModel,UniqueID):
                 raise ValidationError(_('A listing cannot have more than %(max)s photos.'),params={'max': MAX_PHOTOS})
 
     def save(self, *args, **kwargs):
+        """
+        Save the photo after full validation.
+
+        If this photo is marked as `is_main`, any other main photo on the
+        same listing is automatically unmarked first, so a listing never
+        ends up with more than one main photo.
+        """
         self.full_clean()
 
         if self.is_main:
