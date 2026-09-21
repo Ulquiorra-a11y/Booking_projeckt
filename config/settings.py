@@ -16,7 +16,9 @@ from environ import Env
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 env = Env()
-env.read_env(BASE_DIR / '.env')
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    env.read_env(env_file)
 
 
 # Quick-start development settings - unsuitable for production
@@ -102,7 +104,7 @@ MYSQL_DB = {
     }
 
 DATABASES = {
-    'default': MYSQL_DB if env.bool('MY_SQL', default=False) else SQLITE_DB
+    'default': MYSQL_DB if env.bool('MYSQL', default=False) else SQLITE_DB
 }
 
 REST_FRAMEWORK = {
@@ -206,6 +208,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Email
