@@ -20,13 +20,27 @@ class BookingViewSet(ModelViewSet):
 
     def get_queryset(self):
         """
-        Return only bookings where the current user is either the guest
-        who made the booking or the owner of the booked listing.
+        Return bookings visible to the current user.
+
+        By default, returns bookings where the user is either the guest
+        who made the booking or the owner of the booked listing (combined).
+        An optional `?role=` query param narrows this down:
+            - `?role=guest`: only bookings the user made as a guest.
+            - `?role=owner`: only bookings on listings the user owns.
+        Any other or missing value falls back to the combined view.
         """
         user = self.request.user
-        return Booking.objects.filter(
-            Q(guest=user) | Q(listing__owner=user)
-        ).select_related('listing', 'guest')
+        role = self.request.query_params.get('role')
+
+        if role == 'guest':
+            queryset = Booking.objects.filter(guest=user)
+        elif role == 'owner':
+            queryset = Booking.objects.filter(listing__owner=user)
+        else:
+            queryset = Booking.objects.filter(Q(guest=user) | Q(listing__owner=user))
+
+        return queryset.select_related('listing', 'guest')
+
 
     def perform_create(self, serializer):
         """
