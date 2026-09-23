@@ -32,7 +32,7 @@ class ListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Listing
         fields = ('id','title','description','country','city','street','house_number','rooms','photos','max_guests',
-                  'owner_name','created_at', 'price')
+                  'owner_name','created_at', 'price', 'average_rating')
         read_only_fields = ('id','created_at')
 
     def get_owner_name(self,obj):
@@ -43,7 +43,7 @@ class ListingShortUpdateSerializer(serializers.ModelSerializer):
     main_photo = serializers.SerializerMethodField()
     class Meta:
         model = Listing
-        fields = ('url','id','main_photo','title','description','price')
+        fields = ('url','id','main_photo','title','description','price','average_rating')
 
     def get_main_photo(self, obj):
         photo = obj.photos.filter(is_main=True).first()
